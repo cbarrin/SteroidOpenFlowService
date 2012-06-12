@@ -1,0 +1,90 @@
+Written by Aaron Rosen - aaronorosen@gmail.com
+
+SteroidOpenFlowService (SOS) is a WAN optimization for long range TCP connections. 
+
+SOS - makes uses of OpenFlow in order to intercept TCP connections and direct them 
+to near by sos-agents which seamlessly teminates the TCP conncetion. The sos-agent
+then relays the data to a destin agent near the end host. The destin agent then
+completes the connection via the orginal transport protocol used to the end host. 
+Header rewrite is used during this process in order to be completely seamless. 
+
+The sos-agents are equiped with an Open vSwitch in order to perform
+rewrite since most hardware switches are unable to do this at line rate.
+
+
+Setup:
+
+git clone git://github.com/aaronorosen/SteroidOpenFlowService.git
+cd SteroidOpenFlowService
+git submodule init
+git submodule update 
+
+
+Building nox: 
+cd nox
+./boot.sh 
+mkdir build
+cd build
+../configure
+make
+
+
+Setting up openvswitch:
+
+git clone git://openvswitch.org/openvswitch
+cd openvswitch 
+./boot.sh 
+./configure --with-linux=/lib/modules/`uname -r`/build
+make 
+sudo make install 
+insmod datapath/linux/openvswitch.ko
+mkdir -p /usr/local/etc/openvswitch
+ovsdb-tool create /usr/local/etc/openvswitch/conf.db vswitchd/vswitch.ovsschema
+ovsdb-server --remote=punix:/usr/local/var/run/openvswitch/db.sock \
+	--remote=db:Open_vSwitch,manager_options \
+	--private-key=db:SSL,private_key \
+	--certificate=db:SSL,certificate \
+	--bootstrap-ca-cert=db:SSL,ca_cert \
+	--pidfile --detach
+ovs-vsctl --no-wait init
+ovs-vswitchd --pidfile --detach
+
+#create bridge interface 
+ovs-vsctl add-br dp0
+
+#where ethX is the interface connected to OpenFlow network 
+ovs-vsctl add-port dp0 ethX
+ovs-vsctl set bridge dp0 other_config:disable-in-band=true
+ovs-vsctl set-controller dp0 tcp:<ControllerIP>:6633 
+ovs-vsctl set-fail-mode dp0 secure
+ifconfig dp0 YOUR_IP_ADDRESS
+
+
+Note you should update sos.py's DISCOVERY_IP="10.43.100.100"
+to be a value of an used ip address in the same subnet as dp0. 
+This ip address should also be set in common.h in sos-agent
+#define DISCOVERY_DEST_ADDR "10.0.0.100"
+
+
+
+
+Building SOS agent:
+cd sos-agent 
+make
+
+Running: 
+
+cd sos-agent 
+sh run.sh 
+cd nox
+./nox_core -i ptcp:6633 monitoring sos 
+
+Then start a TCP connection from one client connection between two hosts
+that are directly connected via openflow switches with sos-agents running. 
+
+If Tcp port 5003 is used the controller installs flows on all paths in the
+network in order to utilize multiple paths: 
+
+Port 5004 - longest path
+Port 5002 - shortest path
+
