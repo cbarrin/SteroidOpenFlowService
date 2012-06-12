@@ -10,10 +10,10 @@ completes the connection via the original transport protocol used by the end hos
 
 Header rewrite is used during this process in order to be completely seamless. 
 
-The sos-agents are equiped with an Open vSwitch in order to perform
+The sos-agents run Open vSwitch in order to perform
 rewrite since most hardware switches are unable to do this at line rate.
 
-              (can contain loops/multiple paths)
+                (can contain loops/multiple paths)
 Client\------openflow_datapath----L2 network------openflow_datapath-----Server
              |                                       |
 Agent/-------|                                       |------Agent 
@@ -67,7 +67,7 @@ ovs-vsctl set-fail-mode dp0 secure
 ifconfig dp0 YOUR_IP_ADDRESS
 
 
-Note you should update sos.py's DISCOVERY_IP="10.43.100.100"
+Note you should update sos.py's DISCOVERY_IP="10.0.0.100"
 to be a value of an used ip address in the same subnet as dp0. 
 This ip address should also be set in common.h in sos-agent
 #define DISCOVERY_DEST_ADDR "10.0.0.100"
@@ -86,10 +86,10 @@ sh run.sh
 cd nox
 ./nox_core -i ptcp:6633 monitoring sos 
 
-Then start a TCP connection from one client connection between two hosts
-that are directly connected via openflow switches with sos-agents running. 
+Then start a TCP connection between two hosts that are directly connected via
+openflow switches with sos-agents running. 
 
-If Tcp port 5003 is used the controller installs flows on all paths in the
+If tcp port 5003 is used the controller installs flows on all paths in the
 network in order to utilize multiple paths: 
 
 Port 5004 - longest path
