@@ -13,7 +13,7 @@ Header rewrite is used during this process in order to be completely seamless.
 The sos-agents are equiped with an Open vSwitch in order to perform
 rewrite since most hardware switches are unable to do this at line rate.
 
-              (can contain loops and multiple paths)
+              (can contain loops/multiple paths)
 Client\------openflow_datapath----L2 network------openflow_datapath-----Server
              |                                       |
 Agent/-------|                                       |------Agent 
