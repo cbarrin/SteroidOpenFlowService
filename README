@@ -2,14 +2,21 @@ Written by Aaron Rosen - aaronorosen@gmail.com
 
 SteroidOpenFlowService (SOS) is a WAN optimization for long range TCP connections. 
 
-SOS - makes uses of OpenFlow in order to intercept TCP connections and direct them 
-to near by sos-agents which seamlessly teminates the TCP conncetion. The sos-agent
-then relays the data to a destin agent near the end host. The destin agent then
-completes the connection via the orginal transport protocol used to the end host. 
+SOS - makes uses of OpenFlow switches in a network in order to intercept long range
+TCP connection. When intercepted they are then  direct to a near by sos-agent
+which seamlessly teminates the connection. The sos-agent then relays the data
+to a destin agent near the end host. The destin agent then
+completes the connection via the original transport protocol used by the end host. 
+
 Header rewrite is used during this process in order to be completely seamless. 
 
 The sos-agents are equiped with an Open vSwitch in order to perform
 rewrite since most hardware switches are unable to do this at line rate.
+
+              (can contain loops and multiple paths)
+Client\------openflow_datapath----L2 network------openflow_datapath-----Server
+             |                                       |
+Agent/-------|                                       |------Agent 
 
 
 Setup:
