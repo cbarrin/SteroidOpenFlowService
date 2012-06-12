@@ -1,0 +1,3 @@
+[submodule "sos-agent"]
+	path = sos-agent
+	url = git://github.com/aaronorosen/sos-agent.git
